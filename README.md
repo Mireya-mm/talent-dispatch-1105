@@ -75,3 +75,11 @@ python scripts/build_flowchart_svg.py       # 重新生成竖向菱形流程图 
 ## 协议
 
 MIT License，见 [LICENSE](./LICENSE)。
+
+按训练白板要求，根目录 `LICENSE` 的 MIT 协议**覆盖本仓库全部文档与代码**：
+
+- 全部 Markdown 文档：① `业务挖掘.md`、③ `现场调研分析.md`、⑤ `现状流程图.md`，以及 `项目原有资料/` 下四份拆分资料、`README.md`；
+- ② `访谈记录.md / .json / .csv` 三份数据文件与 `source/` 下原始资料，同样随仓库按 MIT 协议提供；
+- `scripts/` 下全部代码（`build_interview_records.py`、`build_flowchart_svg.py`），文件头以 `# SPDX-License-Identifier: MIT` 标注。
+
+根目录 LICENSE 为唯一协议文件，各文件不再重复粘贴全文。原始案例资料仅用于合成演练，协议授权不改变其「待验证假设、不代表真实授权或客户验收」的性质。

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
 """生成竖向、含菱形判断点的现状流程图 SVG。
 
 仅依赖 Python 标准库。输出覆盖仓库根目录下「现状流程图.svg」。

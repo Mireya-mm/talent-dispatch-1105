@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: MIT
 """从 source/discovery-report.md 的「访谈记录」章节生成 md / json / csv 三种格式。
 
 仅依赖 Python 标准库。输出覆盖仓库根目录下对应文件。
