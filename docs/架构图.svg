@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 2120" width="1000" height="2120" font-family="Microsoft YaHei, sans-serif">
+<defs>
+  <marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#2d654f"/></marker>
+  <marker id="ar" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#b23a2e"/></marker>
+</defs>
+<rect x="0" y="0" width="1000" height="2120" fill="#fffdf5"/>
+<text x="40" y="44" font-size="24" fill="#29443b" text-anchor="start" font-weight="bold">架构图 · 业务核对助手（方案设计）</text>
+<text x="40" y="70" font-size="13" fill="#6b7f70" text-anchor="start" font-weight="normal">竖向分层 / 菱形＝必须人工的判断点 / 主轴走正常路径，右侧为「否」分支</text>
+<text x="40" y="92" font-size="12" fill="#6b7f70" text-anchor="start" font-weight="normal">仅设计，不代表已实现系统 · 全链路只读，没有写回通道</text>
+<line x1="460" y1="166" x2="460" y2="192" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<line x1="460" y1="306" x2="460" y2="332" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<text x="478" y="325" font-size="11" fill="#2d654f" text-anchor="start" font-weight="normal">是</text>
+<line x1="460" y1="392" x2="460" y2="418" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<line x1="460" y1="532" x2="460" y2="558" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<text x="478" y="551" font-size="11" fill="#2d654f" text-anchor="start" font-weight="normal">是</text>
+<line x1="460" y1="618" x2="460" y2="644" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<line x1="460" y1="704" x2="460" y2="730" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<line x1="460" y1="844" x2="460" y2="870" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<text x="478" y="863" font-size="11" fill="#2d654f" text-anchor="start" font-weight="normal">已处理</text>
+<line x1="460" y1="930" x2="460" y2="956" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<line x1="460" y1="1070" x2="460" y2="1096" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<text x="478" y="1089" font-size="11" fill="#2d654f" text-anchor="start" font-weight="normal">是</text>
+<line x1="460" y1="1156" x2="460" y2="1182" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<line x1="460" y1="1296" x2="460" y2="1322" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<text x="478" y="1315" font-size="11" fill="#2d654f" text-anchor="start" font-weight="normal">是</text>
+<line x1="460" y1="1382" x2="460" y2="1408" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<line x1="460" y1="1522" x2="460" y2="1548" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<text x="478" y="1541" font-size="11" fill="#2d654f" text-anchor="start" font-weight="normal">是</text>
+<line x1="460" y1="1608" x2="460" y2="1634" stroke="#2d654f" stroke-width="2" marker-end="url(#a)"/>
+<path d="M 640.0,251.0 L 670,251.0 L 670,251.0 L 686,251.0" stroke="#b23a2e" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<text x="662" y="243.0" font-size="11" fill="#b23a2e" text-anchor="end" font-weight="normal">否</text>
+<path d="M 640.0,477.0 L 670,477.0 L 670,477.0 L 686,477.0" stroke="#b23a2e" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<text x="662" y="469.0" font-size="11" fill="#b23a2e" text-anchor="end" font-weight="normal">否</text>
+<path d="M 640.0,789.0 L 670,789.0 L 670,789.0 L 686,789.0" stroke="#b23a2e" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<text x="662" y="781.0" font-size="11" fill="#b23a2e" text-anchor="end" font-weight="normal">否</text>
+<path d="M 640.0,1015.0 L 670,1015.0 L 670,1015.0 L 686,1015.0" stroke="#b23a2e" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<text x="662" y="1007.0" font-size="11" fill="#b23a2e" text-anchor="end" font-weight="normal">否</text>
+<path d="M 640.0,1241.0 L 670,1241.0 L 670,1241.0 L 686,1241.0" stroke="#b23a2e" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<text x="662" y="1233.0" font-size="11" fill="#b23a2e" text-anchor="end" font-weight="normal">否</text>
+<path d="M 640.0,1467.0 L 670,1467.0 L 670,1467.0 L 686,1467.0" stroke="#b23a2e" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+<text x="662" y="1459.0" font-size="11" fill="#b23a2e" text-anchor="end" font-weight="normal">否</text>
+<rect x="300" y="110" width="320" height="56" rx="8" fill="#eaf2e6" stroke="#7a9474" stroke-width="1.5"/>
+<text x="460" y="135" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">数据接入层 · 脱敏只读导出</text>
+<text x="460" y="154" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">批次号 / 岗位代号 / 来源位置 / 两个时间戳</text>
+<polygon points="460,196 640.0,251.0 460,306 280.0,251.0" fill="#fff4d6" stroke="#c9a227" stroke-width="1.8"/>
+<text x="460" y="249.0" font-size="12.5" fill="#29443b" text-anchor="middle" font-weight="bold">◇ 判断 1 · 本单在试点范围内？</text>
+<text x="460" y="271.0" font-size="11" fill="#8a7433" text-anchor="middle" font-weight="normal">清单是否已锁定 · f05</text>
+<rect x="300" y="336" width="320" height="56" rx="8" fill="#eaf2e6" stroke="#7a9474" stroke-width="1.5"/>
+<text x="460" y="361" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">知识层 · 知识库（知识图谱）</text>
+<text x="460" y="380" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">岗位硬条件 / 规则版本 / 关联编号 / 确认状态</text>
+<polygon points="460,422 640.0,477.0 460,532 280.0,477.0" fill="#fff4d6" stroke="#c9a227" stroke-width="1.8"/>
+<text x="460" y="475.0" font-size="12.5" fill="#29443b" text-anchor="middle" font-weight="bold">◇ 判断 2 · 跨工具有统一关联编号？</text>
+<text x="460" y="497.0" font-size="11" fill="#8a7433" text-anchor="middle" font-weight="normal">f30 f31</text>
+<rect x="300" y="562" width="320" height="56" rx="8" fill="#eaf2e6" stroke="#7a9474" stroke-width="1.5"/>
+<text x="460" y="587" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">能力 1 · 场景范围核对</text>
+<text x="460" y="606" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">输出：范围内 / 范围外 + 命中条款</text>
+<rect x="300" y="648" width="320" height="56" rx="8" fill="#eaf2e6" stroke="#7a9474" stroke-width="1.5"/>
+<text x="460" y="673" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">能力 2 · 资料与版本核对（核心）</text>
+<text x="460" y="692" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">抽取口头变更 → 结构化要素 → 版本比对</text>
+<polygon points="460,734 640.0,789.0 460,844 280.0,789.0" fill="#fff4d6" stroke="#c9a227" stroke-width="1.8"/>
+<text x="460" y="787.0" font-size="12.5" fill="#29443b" text-anchor="middle" font-weight="bold">◇ 判断 3 · 变更是否回写需求单？</text>
+<text x="460" y="809.0" font-size="11" fill="#8a7433" text-anchor="middle" font-weight="normal">f10 f23</text>
+<rect x="300" y="874" width="320" height="56" rx="8" fill="#eaf2e6" stroke="#7a9474" stroke-width="1.5"/>
+<text x="460" y="899" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">交付层 · 一页缺项清单</text>
+<text x="460" y="918" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">含来源位置，不给长摘要 · f15</text>
+<polygon points="460,960 640.0,1015.0 460,1070 280.0,1015.0" fill="#fff4d6" stroke="#c9a227" stroke-width="1.8"/>
+<text x="460" y="1013.0" font-size="12.5" fill="#29443b" text-anchor="middle" font-weight="bold">◇ 判断 4 · 版本与关键字段能否确认？</text>
+<text x="460" y="1035.0" font-size="11" fill="#8a7433" text-anchor="middle" font-weight="normal">f44 f41</text>
+<rect x="300" y="1100" width="320" height="56" rx="8" fill="#eaf2e6" stroke="#7a9474" stroke-width="1.5"/>
+<text x="460" y="1125" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">能力 3 · 交接草稿整理</text>
+<text x="460" y="1144" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">最新版本 / 未确认项 / 截止时间 · f23</text>
+<polygon points="460,1186 640.0,1241.0 460,1296 280.0,1241.0" fill="#fff4d6" stroke="#c9a227" stroke-width="1.8"/>
+<text x="460" y="1239.0" font-size="12.5" fill="#29443b" text-anchor="middle" font-weight="bold">◇ 判断 5 · 每条结果能否关联来源与复核记录？</text>
+<text x="460" y="1261.0" font-size="11" fill="#8a7433" text-anchor="middle" font-weight="normal">f42</text>
+<rect x="300" y="1326" width="320" height="56" rx="8" fill="#eaf2e6" stroke="#7a9474" stroke-width="1.5"/>
+<text x="460" y="1351" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">交接单草稿</text>
+<text x="460" y="1370" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">接收人 / 版本 / 未结项 · f20</text>
+<polygon points="460,1412 640.0,1467.0 460,1522 280.0,1467.0" fill="#fff4d6" stroke="#c9a227" stroke-width="1.8"/>
+<text x="460" y="1465.0" font-size="12.5" fill="#29443b" text-anchor="middle" font-weight="bold">◇ 判断 6 · 到岗条件与交接单是否一致？</text>
+<text x="460" y="1487.0" font-size="11" fill="#8a7433" text-anchor="middle" font-weight="normal">f50 f51</text>
+<rect x="300" y="1552" width="320" height="56" rx="8" fill="#f2f6ee" stroke="#2d654f" stroke-width="1.5"/>
+<text x="460" y="1577" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">人工确认闸门</text>
+<text x="460" y="1596" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">正式确认由业务负责人完成 · 模型无审批权 f22 f41</text>
+<rect x="300" y="1638" width="320" height="56" rx="8" fill="#f2f6ee" stroke="#2d654f" stroke-width="1.5"/>
+<text x="460" y="1663" font-size="14" fill="#29443b" text-anchor="middle" font-weight="normal">交接完成</text>
+<text x="460" y="1682" font-size="11" fill="#6b7f70" text-anchor="middle" font-weight="normal">只读、未写回、未对外发送</text>
+<rect x="690" y="223.0" width="270" height="56" rx="8" fill="#fbeae7" stroke="#b23a2e" stroke-width="1.2"/>
+<text x="825.0" y="247.0" font-size="12" fill="#b23a2e" text-anchor="middle" font-weight="normal">整批暂停 / 排除</text>
+<text x="825.0" y="266.0" font-size="10" fill="#6b7f70" text-anchor="middle" font-weight="normal">否 · 不默认按全量处理</text>
+<rect x="690" y="449.0" width="270" height="56" rx="8" fill="#fbeae7" stroke="#b23a2e" stroke-width="1.2"/>
+<text x="825.0" y="473.0" font-size="12" fill="#b23a2e" text-anchor="middle" font-weight="normal">降级人工比对并留痕</text>
+<text x="825.0" y="492.0" font-size="10" fill="#6b7f70" text-anchor="middle" font-weight="normal">否 · 不猜、不自动拼接</text>
+<rect x="690" y="761.0" width="270" height="56" rx="8" fill="#fbeae7" stroke="#b23a2e" stroke-width="1.2"/>
+<text x="825.0" y="785.0" font-size="12" fill="#b23a2e" text-anchor="middle" font-weight="normal">列「变更未回写」+ 旧版本</text>
+<text x="825.0" y="804.0" font-size="10" fill="#6b7f70" text-anchor="middle" font-weight="normal">否 · status = 未确认</text>
+<rect x="690" y="987.0" width="270" height="56" rx="8" fill="#fbeae7" stroke="#b23a2e" stroke-width="1.2"/>
+<text x="825.0" y="1011.0" font-size="12" fill="#b23a2e" text-anchor="middle" font-weight="normal">进人工队列 / 暂停</text>
+<text x="825.0" y="1030.0" font-size="10" fill="#6b7f70" text-anchor="middle" font-weight="normal">否 · 绝不默认通过</text>
+<rect x="690" y="1213.0" width="270" height="56" rx="8" fill="#fbeae7" stroke="#b23a2e" stroke-width="1.2"/>
+<text x="825.0" y="1237.0" font-size="12" fill="#b23a2e" text-anchor="middle" font-weight="normal">不签认，转人工</text>
+<text x="825.0" y="1256.0" font-size="10" fill="#6b7f70" text-anchor="middle" font-weight="normal">否 · 缺来源或缺复核记录</text>
+<rect x="690" y="1439.0" width="270" height="56" rx="8" fill="#fbeae7" stroke="#b23a2e" stroke-width="1.2"/>
+<text x="825.0" y="1463.0" font-size="12" fill="#b23a2e" text-anchor="middle" font-weight="normal">到岗返工登记 / 周复盘</text>
+<text x="825.0" y="1482.0" font-size="10" fill="#6b7f70" text-anchor="middle" font-weight="normal">否 · f54 f55</text>
+<rect x="40" y="1740" width="260" height="150" rx="8" fill="#f2f6ee" stroke="#2d654f" stroke-width="1.2"/>
+<text x="60" y="1767" font-size="14" fill="#29443b" text-anchor="start" font-weight="bold">评测层 · Harness</text>
+<text x="60" y="1793" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 固定样本回归</text>
+<text x="60" y="1816" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 未确认误判为已确认 = 0 容忍</text>
+<text x="60" y="1839" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 每次提示词 / 规则变更全量重跑</text>
+<text x="60" y="1862" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 绑定能力 2 与能力 3</text>
+<rect x="320" y="1740" width="260" height="150" rx="8" fill="#f2f6ee" stroke="#2d654f" stroke-width="1.2"/>
+<text x="340" y="1767" font-size="14" fill="#29443b" text-anchor="start" font-weight="bold">本地部署（例 Ollama）</text>
+<text x="340" y="1793" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 合成资料不出域</text>
+<text x="340" y="1816" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 抽取在本地完成</text>
+<text x="340" y="1839" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 模型选型待定</text>
+<text x="340" y="1862" font-size="11" fill="#29443b" text-anchor="start" font-weight="normal">· 真实接口 / 规则待核实</text>
+<rect x="600" y="1740" width="360" height="150" rx="8" fill="#fbeae7" stroke="#b23a2e" stroke-width="1.2"/>
+<text x="620" y="1767" font-size="14" fill="#b23a2e" text-anchor="start" font-weight="bold">不开放（f05 f32 f52）</text>
+<text x="620" y="1793" font-size="11" fill="#b23a2e" text-anchor="start" font-weight="normal">· 写回需求单 / 台账</text>
+<text x="620" y="1816" font-size="11" fill="#b23a2e" text-anchor="start" font-weight="normal">· 外部消息 / 执行接口</text>
+<text x="620" y="1839" font-size="11" fill="#b23a2e" text-anchor="start" font-weight="normal">· 录用或派遣资格判定</text>
+<text x="620" y="1862" font-size="11" fill="#b23a2e" text-anchor="start" font-weight="normal">· 向真实人员发送安排</text>
+<rect x="40" y="1910" width="920" height="170" rx="8" fill="#f7f4e8" stroke="#cbd4bf" stroke-width="1.2"/>
+<text x="60" y="1937" font-size="14" fill="#29443b" text-anchor="start" font-weight="bold">试点边界（本轮不可越线）</text>
+<text x="60" y="1963" font-size="11.5" fill="#29443b" text-anchor="start" font-weight="normal">· 一个批次 f05；30 个岗位列硬条件与待确认项、变更影响清单 f02；仅脱敏只读导出 f32</text>
+<text x="60" y="1986" font-size="11.5" fill="#29443b" text-anchor="start" font-weight="normal">· 不自动决定录用或派遣资格、不向真实人员发送安排 f05 f52；对外承诺由业务人员确认 f52</text>
+<text x="60" y="2009" font-size="11.5" fill="#29443b" text-anchor="start" font-weight="normal">· 一线可提交变更、正式确认由业务负责人完成，模型没有审批权 f22；正式结论须授权人员确认 f41</text>
+<text x="60" y="2032" font-size="11.5" fill="#29443b" text-anchor="start" font-weight="normal">· 四周、两名骨干、每周不超四小时 f03；范围业务负责人定、质量侧可叫停、客户侧确认用途 f04</text>
+<text x="60" y="2055" font-size="11.5" fill="#29443b" text-anchor="start" font-weight="normal">· f12「80 单 / 22% 重复澄清」为虚构演练样本，不作基线</text>
+<text x="40" y="2100" font-size="11" fill="#6b7f70" text-anchor="start" font-weight="normal">编号 fNN = fsg-assignment-fNN｜来源 discovery-report.md｜方案设计阶段·不开发系统</text>
+</svg>

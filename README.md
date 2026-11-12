@@ -27,12 +27,20 @@ talent-dispatch-1105/
 │   ├── 03-业务发现访谈问题库.md
 │   └── 04-利益相关者资料与分工.md
 ├── ⑤ 现状流程图.md / .svg      竖向流程图，6 个菱形判断点
+├── 方案设计-三项任务结论.md     阶段 4 三项可提交结论（试点／边界／ROI）
+├── docs/                        白板要求的方案设计文档
+│   ├── 技术方案.md / .docx      架构、数据与权限矩阵、接口契约、智能体职责
+│   ├── 提示词.md                三个能力的系统约束、模板、输出 schema
+│   └── 架构图.md / .svg         竖向分层，6 个菱形人工判断点
 ├── source/                      原始资料（发现报告 + 四份可核对资料 HTML）
 │   ├── discovery-report.md
 │   └── 上海外服…四份可核对资料.html
-└── scripts/                     可复现代码
+└── scripts/                     可复现代码（仅标准库，非业务系统）
     ├── build_interview_records.py   访谈记录三格式生成
-    └── build_flowchart_svg.py       竖向菱形流程图生成
+    ├── build_flowchart_svg.py       竖向菱形流程图生成
+    ├── build_architecture_svg.py    方案设计架构图生成
+    ├── build_tech_docx.py           技术方案 md → docx
+    └── calc_roi.py                  首年 ROI 简化测算复现
 ```
 
 ## 证据编号
@@ -56,6 +64,16 @@ talent-dispatch-1105/
 
 主轴走现状问题路径（红色为异常），右侧为另一分支；底部统一标注试点边界。
 
+## 阶段 4 · 方案设计（本轮新增）
+
+只锁一条痛点：**电话改了岗位条件、需求单没回写、交接单仍引用旧版本，到岗才发现再返工**——即「变更没落单、版本没闭环」。时效测不准、无关联编号、复核工时没记录都是它的派生症状，不单独立项。
+
+- `方案设计-三项任务结论.md`：任务 1 三方比较与最小试点、任务 2 数据与权限矩阵和接口契约、任务 3 报价与首年 ROI，三段均可独立复制提交评分。
+- 最小试点：只验证「版本不一致能否在交接前被发现」，不验证自动改单。人工确认 + 确定性规则为主力，模型只负责把口头变更抽成结构化要素，输出一律是草稿。
+- 技术栈按白板五项落位：FastAPI（只读接口）、Python 3.11+、Harness（回归评测）、知识库／知识图谱（岗位硬条件与版本）、本地部署（例 Ollama）；`docs/` 下放技术方案与提示词。
+- 智能体三分工照训练页面写：场景范围核对／资料与版本核对／交接草稿整理；本阶段**只定义职责、输入输出与人工卡点，不开发系统**，实现留到阶段 5 构建集成。
+- ROI 六项输入全部标注「演练假设·待补」，只为跑通计算器；首年净收益 12,000 元、ROI 20%、回本 9 个月均为演练结果，真实样本补齐前不作「划算」结论。
+
 ## 试点边界（不可越线）
 
 - 一个批次的需求单 f05；仅脱敏只读导出，写回／外部消息／执行接口不开放 f32。
@@ -68,9 +86,12 @@ talent-dispatch-1105/
 ```bash
 python scripts/build_interview_records.py   # 由 source/discovery-report.md 生成三种格式的访谈记录
 python scripts/build_flowchart_svg.py       # 重新生成竖向菱形流程图 SVG
+python scripts/build_architecture_svg.py    # 重新生成方案设计架构图 SVG
+python scripts/build_tech_docx.py           # 由 docs/技术方案.md 生成 .docx
+python scripts/calc_roi.py                  # 复现首年 ROI 与打平临界点
 ```
 
-脚本仅依赖 Python 标准库，输出覆盖仓库根目录下对应文件。
+脚本仅依赖 Python 标准库，不接任何业务接口、不读业务数据；`calc_roi.py` 为纯数值计算，不属于业务系统代码。
 
 ## 协议
 
@@ -78,8 +99,8 @@ MIT License，见 [LICENSE](./LICENSE)。
 
 按训练白板要求，根目录 `LICENSE` 的 MIT 协议**覆盖本仓库全部文档与代码**：
 
-- 全部 Markdown 文档：① `业务挖掘.md`、③ `现场调研分析.md`、⑤ `现状流程图.md`，以及 `项目原有资料/` 下四份拆分资料、`README.md`；
-- ② `访谈记录.md / .json / .csv` 三份数据文件与 `source/` 下原始资料，同样随仓库按 MIT 协议提供；
-- `scripts/` 下全部代码（`build_interview_records.py`、`build_flowchart_svg.py`），文件头以 `# SPDX-License-Identifier: MIT` 标注。
+- 全部 Markdown 文档：① `业务挖掘.md`、③ `现场调研分析.md`、⑤ `现状流程图.md`、`方案设计-三项任务结论.md`，以及 `项目原有资料/` 下四份拆分资料、`docs/` 下 `技术方案.md`、`提示词.md`、`架构图.md` 和 `README.md`；
+- ② `访谈记录.md / .json / .csv` 三份数据文件、`docs/技术方案.docx`、`docs/架构图.svg` 与 `source/` 下原始资料，同样随仓库按 MIT 协议提供；
+- `scripts/` 下全部代码（五个脚本），文件头以 `# SPDX-License-Identifier: MIT` 标注。
 
 根目录 LICENSE 为唯一协议文件，各文件不再重复粘贴全文。原始案例资料仅用于合成演练，协议授权不改变其「待验证假设、不代表真实授权或客户验收」的性质。
