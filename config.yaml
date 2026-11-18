@@ -1,0 +1,66 @@
+# 工程唯一配置入口：所有地址、模型名、权限、红线都在这里，代码里不写死。  # noqa
+# 注意：D:/ollama/config.yaml 只是安装期产物，本工程只读仓库根这一份。      # noqa
+app:                                          # 应用自身配置段
+  name: "派遣岗位需求与到岗交接业务核对助手"    # 服务名，出现在 /health
+  version: "0.1.0"                            # 版本，随阶段递增
+  env: "synthetic-training"                   # 环境标识：合成演练，非生产
+
+server:                                       # FastAPI 运行配置
+  host: "127.0.0.1"                           # 只监听本机，不对公网暴露
+  port: 8000                                  # 服务端口
+  reload: false                               # 不启用热重载，避免演练环境误重启
+
+ollama:                                       # 本地模型配置
+  base_url: "http://127.0.0.1:11434"          # 本地服务地址，不出网
+  model: "fsg-assign-check:0.8b"              # 项目专用模型
+  base_model: "qwen3.5:0.8b"                  # 基座模型，仅用于 /models 展示
+  timeout_seconds: 60                         # 单次调用超时，超时转人工队列
+  temperature: 0.1                            # 低温度，减少小模型自由发挥
+  num_ctx: 4096                               # 上下文窗口
+  num_predict: 1024                           # 输出上限，必须留够否则 content 为空
+  think: false                                # 关键：Qwen3.5 默认思考会吃光 token
+  format: "json"                              # 要求结构化输出，便于 schema 校验
+
+guardrails:                                   # 数据红线（硬约束，代码层无写回通道）
+  read_only: true                             # 只处理脱敏只读导出
+  auto_writeback: false                       # 禁止自动回写需求单
+  auto_decide: false                          # 禁止自动决定录用或派遣资格
+  send_to_real_person: false                  # 禁止向真实人员发送安排
+  model_has_approval: false                   # 模型没有审批权
+  unconfirmed_to_human_queue: true            # 版本/关键字段确认不了转人工
+  require_source_per_item: true               # 每条结果必须挂来源位置
+  synthetic_sample_as_baseline: false         # f12 虚构样本不作基线
+
+permissions:                                  # 权限矩阵：角色 -> 允许的动作
+  frontline:                                  # 一线（服务专员/到岗协调）
+    read: true                                # 只读
+    submit_change: true                       # 可提交变更
+    confirm_version: false                    # 不能确认版本
+    halt: false                               # 不能叫停
+  business_owner:                             # 业务负责人
+    read: true                                # 只读
+    submit_change: true                       # 可提交变更
+    confirm_version: true                     # 可确认版本
+    halt: false                               # 不能叫停
+  quality_review:                             # 质量复核
+    read: true                                # 只读并看复核记录
+    submit_change: false                      # 不提交变更
+    confirm_version: false                    # 不确认版本
+    halt: true                                # 可叫停
+  client_site:                                # 客户现场
+    read: true                                # 只看结果用途
+    submit_change: false                      # 不提交变更
+    confirm_version: false                    # 不确认版本
+    halt: false                               # 不能叫停
+
+pilot:                                        # 试点范围
+  batch_id: "PILOT-1105-01"                   # 批次号，演练用
+  position_list: []                           # 试点岗位清单，业务负责人锁定前为空
+  lock_required: true                         # 清单为空则整批暂停，不默认全量
+
+harness:                                      # Harness 回归评测配置
+  prompt_version: "v0.1"                      # 提示词版本，改动后必须重跑回归
+  zero_tolerance_cases:                       # 零容忍用例：未确认误判为已确认
+    - "P1_unconfirmed_as_confirmed"           # 用例标识
+  min_recall: 1.0                             # 缺项召回率下限（固定样本）
+  min_source_traceability: 1.0                # 来源可追溯率下限
