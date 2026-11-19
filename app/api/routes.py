@@ -10,6 +10,9 @@ from app.core.guard import check_guardrails  # 红线校验
 from app.agents.harness import run_pipeline, run_regression  # Harness 编排与评测
 from app.auth.deps import require  # 权限依赖
 from app.auth.auth_store import audit  # 审计留痕
+from app.llm.ollama_client import probe_model  # 模型在线探测
+from app.knowledge import store as kb  # 知识库只读统计
+from app.knowledge.graph import get_position_facts  # 岗位事实（只读）
 
 router = APIRouter()  # 创建路由器实例
 
@@ -55,6 +58,51 @@ def models():
         "base_model": get("ollama", "base_model"),  # 基座模型
         "think": get("ollama", "think"),  # 思考开关（应为 false）
     })
+
+
+@router.get("/v1/system/status")  # 工作台系统状态
+def system_status(user: dict = Depends(require("read"))):
+    """返回工作台所需的真实系统状态：模型在线、试点锁定、知识库统计。
+
+    入参：user(dict) 当前登录用户（需 read 权限）。
+    出参：统一结构，data 含 model/pilot/knowledge 三组真实状态。
+    失败行为：知识库统计失败降级为 0，不影响其余状态返回；模型探测内部已兜底。
+    """
+    pilot_list = get("pilot", "position_list") or []  # 读当前试点清单（内存态，管理员可锁）
+    return ok({  # 返回真实状态
+        "model": probe_model(),  # 模型在线探测（真实请求本地服务）
+        "pilot": {  # 试点范围状态
+            "locked": bool(pilot_list),  # 清单非空即已锁定
+            "positions": pilot_list,  # 当前清单
+            "batch_id": get("pilot", "batch_id"),  # 批次号
+        },  # 试点结束
+        "knowledge": {  # 知识库统计（真实查询）
+            "notice": kb.evidence_notice(),  # 数据声明
+            "sample_hint": "试试搜索：夜班资格、电工证、版本、交接、关联编号",  # 检索提示
+        },  # 知识库结束
+        "current_user": {"username": user["username"], "role": user["role"]},  # 当前身份
+    })  # 返回
+
+
+@router.get("/v1/positions")  # 岗位事实列表
+def positions(user: dict = Depends(require("read"))):
+    """列出知识库中全部岗位的只读事实，供工作台表单加载真实岗位。
+
+    入参：user(dict) 当前登录用户（需 read 权限）。
+    出参：统一结构，data 为岗位事实列表（含硬条件/规则版本/关联编号/来源）。
+    失败行为：知识库为空返回空列表；不猜不拼，只读已存在的事实。
+    """
+    conn = kb.connect_ro()  # 只读连接
+    try:  # 查全部岗位 id
+        ids = [r["id"] for r in conn.execute("SELECT id FROM facts WHERE type='岗位'").fetchall()]  # 岗位编号
+    finally:  # 关闭连接
+        conn.close()  # 释放只读连接
+    items = []  # 结果列表
+    for pid in ids:  # 逐岗位取事实
+        f = get_position_facts(pid)  # 只读事实
+        if f:  # 命中
+            items.append({"position_code": pid, **f})  # 加入列表
+    return ok(items)  # 返回真实岗位列表
 
 
 @router.get("/harness/regression")  # 回归评测端点

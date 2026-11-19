@@ -39,6 +39,34 @@ def build_payload(user_text, system_text=None):
     }
 
 
+def probe_model():
+    """探测模型服务是否在线（只查 /api/tags，不做生成，短超时）。
+
+    入参：无。
+    出参：dict，{"online": bool, "model": str, "reason": str}。
+    失败行为：连接失败/超时/非200 一律 online=False 并给原因，不抛异常。
+    用途：前端工作台据此如实展示「模型在线/离线」，离线时抽取步骤降级转人工。
+    """
+    url = get("ollama", "base_url").rstrip("/") + "/api/tags"  # 探测地址
+    timeout = get("ollama", "probe_timeout_seconds", 3)  # 短超时，避免拖慢页面
+    req = urllib.request.Request(url, method="GET")  # GET 请求
+    try:  # 捕获所有探测失败
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # 发起探测
+            body = json.loads(resp.read().decode("utf-8"))  # 解析模型列表
+        names = [m.get("name", "") for m in body.get("models", [])]  # 取模型名
+        target = get("ollama", "model")  # 项目专用模型名
+        hit = any(n.split(":")[0] == target.split(":")[0] for n in names)  # 同名即算可用
+        return {  # 返回结果
+            "online": True,  # 服务在线
+            "model": target,  # 配置的目标模型
+            "installed": hit,  # 目标模型是否已装载
+            "reason": "模型服务在线" if hit else "服务在线但未发现目标模型",
+        }
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError) as e:  # 离线
+        return {"online": False, "model": get("ollama", "model"), "installed": False,
+                "reason": f"模型服务离线（{type(e).__name__}），抽取步骤将降级转人工"}
+
+
 def call_model(user_text, system_text=None):
     """调用本地模型，返回结构化结果或降级标记（不抛异常）。
 
