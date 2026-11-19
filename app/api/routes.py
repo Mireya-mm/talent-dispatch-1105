@@ -1,19 +1,20 @@
 # SPDX-License-Identifier: MIT
 """路由定义：/health、/models、POST /v1/check 核对主链路。"""  # 模块说明
 
-from fastapi import APIRouter  # API 路由器
+from fastapi import APIRouter, Depends  # API 路由器与依赖
 from pydantic import BaseModel  # 请求体模型
 from typing import Optional  # 可选类型
 from app.core.config import get  # 读取配置
 from app.core.response import ok  # 统一成功结构
 from app.core.guard import check_guardrails  # 红线校验
 from app.agents.harness import run_pipeline, run_regression  # Harness 编排与评测
+from app.auth.deps import require  # 权限依赖
+from app.auth.auth_store import audit  # 审计留痕
 
 router = APIRouter()  # 创建路由器实例
 
 
 class CheckRequest(BaseModel):  # 核对请求体 schema
-    role: str  # 操作角色（权限用）
     batch_id: str  # 批次号
     position_code: str  # 岗位代号
     demand_doc: str = ""  # 脱敏需求单文本
@@ -68,14 +69,16 @@ def regression():
 
 
 @router.post("/v1/check")  # 核对主链路
-def check(req: CheckRequest):
-    """执行一次核对：红线校验 → 三能力编排 → 返回草稿或人工队列。
+def check(req: CheckRequest, user: dict = Depends(require("read"))):
+    """执行一次核对：鉴权 → 红线校验 → 三能力编排 → 返回草稿或人工队列。
 
-    入参：req(CheckRequest) 请求体。
-    出参：统一结构；红线被触碰返回 fail(E_PERM_DENIED)，否则 data 为核对结果。
-    失败行为：红线拦截不进入模型；其余异常由全局异常处理器兜住。
+    入参：req(CheckRequest) 请求体；user(dict) 由 token 解析出的当前用户。
+    出参：统一结构；未登录/无 read 权限/触碰红线返回 fail(E_PERM_DENIED)。
+    失败行为：鉴权失败在依赖层拒绝；红线拦截不进入模型；其余异常全局兜底。
     """
-    # 安全审查注释：先过红线校验，写回/自动决策/发真人安排一律拒绝，
+    # 安全审查注释：角色来自 token（require 依赖注入），不再信请求体自报，
+    # 一线、质量、客户、管理员各按权限矩阵受限，模型无任何 token 进不来。
+    # 先过红线校验，写回/自动决策/发真人安排一律拒绝，
     # 从结构上不给这些能力任何通道——不是靠模型判断，是代码里根本没有。
     gr = check_guardrails({  # 红线校验
         "writeback": req.writeback,  # 写回标志
@@ -93,4 +96,5 @@ def check(req: CheckRequest):
         req.oral_text,  # 口头变更
         req.link_key,  # 关联编号
     )
+    audit(user["username"], "check", f"核对批次 {req.batch_id} 岗位 {req.position_code}")  # 记审计
     return ok(result)  # 返回统一成功结构（含 human_review，不替人确认）

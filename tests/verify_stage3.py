@@ -65,11 +65,22 @@ check("链路转人工不出草稿", res["human_review"]["required"] is True and
 try:  # 尝试 HTTP 断言
     from fastapi.testclient import TestClient  # 测试客户端
     from app.main import app  # 应用实例
+    from app.core.config import get  # 读引导账号口令
     client = TestClient(app)  # 创建客户端
     r = client.get("/harness/regression")  # 回归端点
     check("/harness/regression 200", r.status_code == 200 and r.json()["data"]["passed"] is True)  # 断言
-    blocked = client.post("/v1/check", json={  # 触碰写回红线
-        "role": "business_owner", "batch_id": "P", "position_code": "POS-A", "writeback": True,
+    # 未登录访问主链路必须被拒（新增鉴权断言）
+    noauth = client.post("/v1/check", json={"batch_id": "P", "position_code": "POS-A"})  # 无 token
+    check("未登录访问被拒绝", noauth.status_code == 403 and noauth.json()["ok"] is False)  # 鉴权
+    # 登录后触碰写回红线仍被拒
+    lg = client.post("/v1/auth/login", json={  # 登录拿 token
+        "username": get("auth", "bootstrap_admin", "admin"),  # 账号
+        "password": get("auth", "bootstrap_password", "ChangeMe@1105"),  # 口令
+    })  # 登录请求
+    token = lg.json()["data"]["token"]  # 取 token
+    check("登录成功拿到 token", lg.status_code == 200 and bool(token))  # 登录断言
+    blocked = client.post("/v1/check", headers={"Authorization": "Bearer " + token}, json={  # 带 token 触碰红线
+        "batch_id": "P", "position_code": "POS-A", "writeback": True,
     })
     check("写回请求被拒绝", blocked.status_code == 200 and blocked.json()["ok"] is False)  # 红线
 except ImportError:  # httpx 未装

@@ -57,7 +57,15 @@ def capability_check(batch_id, position_code, demand_doc, handover_doc, oral_tex
         _extract_version(handover_doc, "交接单版本"),  # 交接单版本
         rule_version,  # 规则版本基准
     )
-    up = user_prompt(batch_id, position_code, demand_doc, handover_doc, oral_text, link_key)  # 构造提示词
+    # RAG 检索：从只读知识库取证据片段，注入提示词供模型参考（带来源位置）。
+    # 增强注释：检索失败/库未初始化不当作核对失败——检索只增强上下文，
+    # 版本与关联结论仍由上面的确定性规则给，绝不因检索问题放行或拦截。
+    try:  # 检索是增强项，失败降级为「无证据」继续走规则
+        from app.knowledge.store import search as kb_search  # 局部导入
+        evidence = kb_search(oral_text or position_code)  # 按口头变更/岗位检索证据
+    except Exception:  # 知识库不可用
+        evidence = []  # 无证据，不影响规则判定
+    up = user_prompt(batch_id, position_code, demand_doc, handover_doc, oral_text, link_key, evidence)  # 构造提示词（含证据）
     model = call_model(up, SYSTEM_CONSTRAINT)  # 唯一一次模型调用
     model_data = model["data"] if model["ok"] else None  # 取模型数据
     schema_valid = validate_model_output(model_data)["valid"] if model_data else False  # 校验
@@ -68,6 +76,7 @@ def capability_check(batch_id, position_code, demand_doc, handover_doc, oral_tex
         "schema_valid": schema_valid,  # schema 是否通过
         "version_result": vr,  # 确定性版本结论
         "link_result": link_result,  # 关联编号结论
+        "evidence": evidence,  # RAG 检索证据（带来源，供追溯）
         "model_reason": model["reason"],  # 模型调用说明
     }
 

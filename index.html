@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>派遣岗位需求与到岗交接 · 核对流程演示</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --line:#e3e8ef; --ink:#0f172a; --sub:#64748b;
+    --accent:#2563eb; --ok:#059669; --bad:#dc2626; --warn:#d97706; --neutral:#64748b;
+    --softblue:#eff6ff; --softgreen:#ecfdf5; --softred:#fef2f2; --softwarn:#fffbeb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .app{max-width:1240px;margin:0 auto;padding:28px 22px 60px}
+
+  /* 头部 */
+  .hero{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+  .hero h1{font-size:22px;font-weight:700;letter-spacing:.2px}
+  .hero p{color:var(--sub);font-size:13px;margin-top:4px}
+  .badge-sim{margin-left:auto;flex-shrink:0;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;
+    font-size:12px;padding:6px 12px;border-radius:20px;font-weight:600}
+
+  /* 提示条 */
+  .notice{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:10px;padding:12px 16px;font-size:12.5px;color:#334155;margin-bottom:20px}
+  .notice b{color:var(--accent)}
+  .notice .redline{color:var(--bad);font-weight:600}
+
+  /* 布局 */
+  .grid{display:grid;grid-template-columns:390px 1fr;gap:20px;align-items:start}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 1px 3px rgba(15,23,42,.04)}
+  .panel-h{padding:15px 18px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px}
+  .panel-h .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .panel-b{padding:18px}
+
+  /* 场景卡片 */
+  .label{font-size:12px;color:var(--sub);font-weight:600;margin:4px 0 8px;display:block}
+  .scenarios{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+  .scn{border:1px solid var(--line);border-radius:9px;padding:10px 11px;cursor:pointer;
+    background:#fff;text-align:left;transition:.16s;font-size:12.5px;color:#334155}
+  .scn:hover{border-color:#93c5fd;background:#f8fbff}
+  .scn.on{border-color:var(--accent);background:var(--softblue);box-shadow:inset 0 0 0 1px var(--accent)}
+  .scn .t{font-weight:700;color:var(--ink);display:block;margin-bottom:2px}
+  .scn .d{color:var(--sub);font-size:11.5px}
+
+  /* 表单 */
+  .field{margin-bottom:13px}
+  .field label{font-size:12px;color:#475569;font-weight:600;display:block;margin-bottom:5px}
+  .field .hint{font-weight:400;color:#94a3b8;font-size:11px}
+  input[type=text],select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;
+    padding:8px 10px;font-size:13px;color:var(--ink);background:#fff;font-family:inherit;transition:.16s}
+  input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  textarea{resize:vertical;min-height:66px;line-height:1.5}
+  .checkrow{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:12.5px;color:#334155;
+    background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+  .checkrow input{width:15px;height:15px;accent-color:var(--accent)}
+
+  .btns{display:flex;gap:9px;margin-top:6px}
+  button.go{flex:1;background:var(--accent);color:#fff;border:none;border-radius:9px;
+    padding:11px;font-size:14px;font-weight:700;cursor:pointer;transition:.16s}
+  button.go:hover{background:#1d4ed8}
+  button.go:disabled{background:#93c5fd;cursor:default}
+  button.reset{background:#fff;color:#475569;border:1px solid var(--line);border-radius:9px;
+    padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer}
+  button.reset:hover{background:#f8fafc}
+
+  /* 流程时间线 */
+  .flow{position:relative;padding-left:34px}
+  .flow::before{content:'';position:absolute;left:11px;top:10px;bottom:12px;width:2px;background:var(--line)}
+  .step{position:relative;margin-bottom:13px;background:#fff;border:1px solid var(--line);
+    border-radius:11px;overflow:hidden;opacity:.6;transition:opacity .35s}
+  .step.show{opacity:1}
+  .step::before{content:'';position:absolute;left:-28px;top:18px;width:13px;height:13px;border-radius:50%;
+    background:#cbd5e1;border:2px solid #fff;box-shadow:0 0 0 2px var(--line);z-index:2;transition:.35s}
+  .step.show::before{background:var(--accent);box-shadow:0 0 0 2px #bfdbfe}
+  .step-h{display:flex;align-items:center;gap:10px;padding:13px 15px}
+  .step-no{width:25px;height:25px;flex-shrink:0;border-radius:7px;background:var(--softblue);
+    color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+  .step-title{font-weight:700;font-size:14px}
+  .step-sub{color:var(--sub);font-size:11.5px;font-weight:400;margin-left:2px}
+  .badge{margin-left:auto;font-size:11.5px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap}
+  .b-ok{background:var(--softgreen);color:var(--ok)}
+  .b-bad{background:var(--softred);color:var(--bad)}
+  .b-warn{background:var(--softwarn);color:var(--warn)}
+  .b-neutral{background:#f1f5f9;color:var(--neutral)}
+  .step-body{max-height:0;opacity:0;padding:0 15px;transition:max-height .45s ease,opacity .35s ease,padding .35s ease}
+  .step.show .step-body{max-height:1400px;opacity:1;padding:0 15px 15px}
+
+  /* 内容元素 */
+  .kv{display:flex;gap:10px;padding:5px 0;font-size:12.5px;border-bottom:1px dashed #eef2f7}
+  .kv:last-child{border-bottom:none}
+  .kv .k{color:var(--sub);min-width:112px;flex-shrink:0}
+  .kv .v{color:var(--ink);font-weight:600}
+  .mini-tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:6px;font-weight:600}
+  .mt-ok{background:var(--softgreen);color:var(--ok)}
+  .mt-bad{background:var(--softred);color:var(--bad)}
+  .mt-warn{background:var(--softwarn);color:var(--warn)}
+  .mt-gray{background:#f1f5f9;color:var(--neutral)}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--sub);font-weight:600;background:#f8fafc}
+  .hd{font-size:12px;font-weight:700;color:#334155;margin:12px 0 2px;padding-left:9px;border-left:3px solid var(--accent)}
+  .hd:first-child{margin-top:0}
+  .note{font-size:11.5px;color:var(--sub);background:#f8fafc;border-radius:7px;padding:8px 10px;margin-top:10px}
+  .note.warn{background:var(--softwarn);color:#92400e}
+  .concl{margin-top:11px;font-size:12.5px;background:var(--softblue);border-radius:8px;padding:10px 12px;color:#1e3a8a}
+  .concl.bad{background:var(--softred);color:#991b1b}
+  .concl.ok{background:var(--softgreen);color:#065f46}
+  .reason{display:flex;align-items:flex-start;gap:8px;padding:6px 9px;border-radius:7px;font-size:12.5px;margin-bottom:6px}
+  .reason.hard{background:var(--softred);color:#991b1b}
+  .reason.sign{background:var(--softblue);color:#1e40af}
+  .reason .ic{font-weight:700;flex-shrink:0}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .chip{background:#f1f5f9;border:1px solid var(--line);border-radius:20px;padding:4px 11px;font-size:11.5px;color:#334155}
+  .chip b{color:var(--accent)}
+  .redbar{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+  .redbar h3{font-size:13px;margin-bottom:10px;color:var(--bad)}
+  .redgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:9px}
+  .reditem{font-size:12px;color:#475569;background:var(--softred);border-radius:8px;padding:9px 11px}
+  .reditem b{color:var(--bad)}
+  .foot{text-align:center;color:#94a3b8;font-size:11.5px;margin-top:22px}
+  .skip{color:#94a3b8;font-style:italic;font-size:12px;padding:10px 0}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div>
+      <h1>派遣岗位需求与到岗交接 · 核对流程</h1>
+      <p>把电话里的口头变更核对清楚，检出版本不一致，交人工确认 —— 全程只读，不写回、不派活。</p>
+    </div>
+    <div class="badge-sim">合成演练 · 非生产</div>
+  </div>
+
+  <div class="notice">
+    <b>怎么看这个演示：</b>左侧选场景或直接改版本号 / 关联编号，点「开始核对」，右侧五步会依次展开。
+    判定逻辑（范围、版本、关联、schema、人工闸门）<b>严格按工程代码复刻</b>；模型抽变更那一步由预设样本模拟（真实系统由本地 0.8B 产出）。
+    <span class="redline">红线：版本结论只由规则给、模型零审批权，任何未确认都不自动放行。</span>
+  </div>
+
+  <div class="grid">
+    <!-- 输入面板 -->
+    <section class="panel">
+      <div class="panel-h"><span class="dot"></span>输入 / 场景</div>
+      <div class="panel-b">
+        <span class="label">选择场景（也可在下方手动微调）</span>
+        <div class="scenarios" id="scenarios"></div>
+
+        <label class="checkrow">
+          <input type="checkbox" id="chkLocked" checked>
+          <span>试点岗位清单已由业务负责人锁定 <span class="hint">（不勾选＝整批暂停）</span></span>
+        </label>
+
+        <div class="field">
+          <label>岗位代号</label>
+          <select id="selPosition">
+            <option value="POS-A">POS-A</option>
+            <option value="POS-B">POS-B</option>
+            <option value="POS-C">POS-C（清单外）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>需求单版本</label>
+          <input type="text" id="inDemand">
+        </div>
+        <div class="field">
+          <label>交接单版本</label>
+          <input type="text" id="inHandover">
+        </div>
+        <div class="field">
+          <label>规则基准版本 <span class="hint">（来自岗位事实表）</span></label>
+          <input type="text" id="inRule">
+        </div>
+        <div class="field">
+          <label>关联编号 <span class="hint">（LK-1001 / LK-1002；留空＝缺失）</span></label>
+          <input type="text" id="inLink">
+        </div>
+        <div class="field">
+          <label>电话口头变更原文</label>
+          <textarea id="inOral"></textarea>
+        </div>
+
+        <div class="btns">
+          <button class="go" id="btnGo">开始核对</button>
+          <button class="reset" id="btnReset">重置</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 流程面板 -->
+    <section class="panel">
+      <div class="panel-h"><span class="dot"></span>核对流程（三能力 · 五步呈现）</div>
+      <div class="panel-b">
+        <div class="flow">
+          <div class="step" id="step1"><div class="step-h"><span class="step-no">1</span>
+            <span class="step-title">场景范围核对 <span class="step-sub">能力① · 确定性规则</span></span><span class="badge"></span></div>
+            <div class="step-body"></div></div>
+
+          <div class="step" id="step2"><div class="step-h"><span class="step-no">2</span>
+            <span class="step-title">抽取口头变更 <span class="step-sub">能力② · 模型（草稿，非结论）</span></span><span class="badge"></span></div>
+            <div class="step-body"></div></div>
+
+          <div class="step" id="step3"><div class="step-h"><span class="step-no">3</span>
+            <span class="step-title">资料与版本复核 <span class="step-sub">能力② · 确定性规则（版本不交给模型）</span></span><span class="badge"></span></div>
+            <div class="step-body"></div></div>
+
+          <div class="step" id="step4"><div class="step-h"><span class="step-no">4</span>
+            <span class="step-title">人工确认闸门 <span class="step-sub">能力③ · 模型零审批权</span></span><span class="badge"></span></div>
+            <div class="step-body"></div></div>
+
+          <div class="step" id="step5"><div class="step-h"><span class="step-no">5</span>
+            <span class="step-title">结论与证据 <span class="step-sub">只读输出</span></span><span class="badge"></span></div>
+            <div class="step-body"></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="redbar">
+    <h3>贯穿全程的红线</h3>
+    <div class="redgrid">
+      <div class="reditem"><b>不写回</b>：不自动改需求单 / 交接单</div>
+      <div class="reditem"><b>不自动决定</b>：不判录用、不判派遣资格</div>
+      <div class="reditem"><b>不发安排</b>：不向真人发到岗通知</div>
+      <div class="reditem"><b>模型零审批权</b>：最终签认只能由业务负责人完成</div>
+    </div>
+  </div>
+
+  <div class="foot">本页为交互演示原型 · 判定逻辑复刻自 talent-dispatch-1105 工程 · 虚构演练样本不作基线</div>
+</div>
+
+<script>
+/* ---------- 真实规则复刻 ---------- */
+const FACTS = {
+  "POS-A":{hard:["夜班资格","电工证"], rule:"rule-v2", source:"需求单 DEMAND-A / 字段-技能条件"},
+  "POS-B":{hard:["叉车证"], rule:"rule-v1", source:"需求单 DEMAND-B / 字段-技能条件"}
+};
+const PILOT = ["POS-A","POS-B"];
+const LINKMAP = {
+  "LK-1001":["DEMAND-A","HANDOVER-A","RULE-A"],
+  "LK-1002":["DEMAND-B","HANDOVER-B","RULE-B"]
+};
+const EVIDENCE = {
+  "f10":"电话改技能条件","f11":"夜班未同步","f13":"回填时间≠发生时间",
+  "f30":"无统一关联编号","f42":"每条挂来源+人工复核","f50":"到岗返工"
+};
+
+/* 预设场景：体现不同分支。modelChanges/schema 为模型抽取模拟。 */
+const SCENARIOS = {
+  A:{ name:"电话改条件未回写", desc:"版本不一致 · 转人工",
+      position:"POS-A", demand:"demand-v2", handover:"handover-v1", rule:"rule-v2", link:"LK-1001",
+      oral:"电话里把技能要求改成需要夜班资格，需求单未回写；临时加夜班，已确认的白班班次没同步。",
+      modelReason:"模型输出已解析，待 schema 校验",
+      changes:[{field:"班次",value:"夜班",status:"未确认",source:"电话记录原文（临时加夜班，白班班次没同步）"}],
+      schemaValid:false, schemaErrors:["缺少字段：missing_items","缺少字段：handover_draft"] },
+  B:{ name:"版本已对齐到位", desc:"全通过 · 仍需签认",
+      position:"POS-A", demand:"rule-v2", handover:"rule-v2", rule:"rule-v2", link:"LK-1001",
+      oral:"已确认：POS-A 技能条件更新为夜班资格，需求单与交接单都已同步到 rule-v2，来源见需求单。",
+      modelReason:"模型输出已解析，待 schema 校验",
+      changes:[{field:"技能条件",value:"夜班资格",status:"已确认",source:"需求单 DEMAND-A / 字段-技能条件"}],
+      schemaValid:true, schemaErrors:[] },
+  C:{ name:"关联编号缺失", desc:"编号无匹配 · 转人工",
+      position:"POS-A", demand:"rule-v2", handover:"rule-v2", rule:"rule-v2", link:"",
+      oral:"需求单和交接单都更新到 rule-v2 了，但没挂统一关联编号，先别自动合并。",
+      modelReason:"模型输出已解析，待 schema 校验",
+      changes:[{field:"技能条件",value:"夜班资格",status:"已确认",source:"需求单 DEMAND-A / 字段-技能条件"}],
+      schemaValid:true, schemaErrors:[] },
+  D:{ name:"岗位在清单外", desc:"范围外 · 整批拦截",
+      position:"POS-C", demand:"rule-v1", handover:"rule-v1", rule:"", link:"LK-1001",
+      oral:"新增岗位 POS-C 也想一起核对。",
+      modelReason:"未实际调用模型",
+      changes:[], schemaValid:false, schemaErrors:[] }
+};
+
+function calcScope(locked, position){
+  if(!locked) return {inScope:false, reason:"试点岗位清单未锁定，整批暂停", facts:null};
+  if(!PILOT.includes(position)) return {inScope:false, reason:"不在试点清单", facts:null};
+  if(!FACTS[position]) return {inScope:false, reason:"岗位事实缺失，转人工", facts:null};
+  return {inScope:true, reason:"命中试点清单", facts:FACTS[position]};
+}
+function calcLink(link){
+  if(!link) return {found:false, docs:[], reason:"关联编号缺失，转人工比对"};
+  if(!LINKMAP[link]) return {found:false, docs:[], reason:"关联编号无匹配，转人工比对"};
+  return {found:true, docs:LINKMAP[link], reason:"关联编号命中"};
+}
+function calcVersion(d,h,r){
+  const versions={"需求单版本":d,"交接单版本":h,"规则基准版本":r};
+  const missing=Object.keys(versions).filter(k=>!versions[k]);
+  const vals=Object.values(versions).filter(Boolean);
+  let inconsistent=[];
+  if(vals.length && new Set(vals).size>1) inconsistent=Object.keys(versions);
+  const consistent = missing.length===0 && inconsistent.length===0;
+  const reason = consistent ? "三个版本一致" : (missing.length ? "版本缺失："+missing.join("、") : "版本不一致");
+  return {consistent, missing, inconsistent, reason, versions};
+}
+function calcReview(scope, changes, schema, ver, link){
+  const reasons=[]; const hard=[];
+  function add(msg,isHard){ reasons.push({msg,isHard}); if(isHard)hard.push(msg); }
+  if(!scope.inScope){
+    // 范围外：能力③直接拦截，只给范围原因，不做实质核对（对应 capability_handover 早返回）
+    add("不在试点范围或清单未锁定："+scope.reason,true);
+  }else{
+    // 范围内：逐条对应 evaluate_human_review
+    if(!changes || changes.length===0) add("模型不可用或输出为空",true);
+    if(!schema.valid) add("模型输出不符合 schema",true);
+    if(!ver.consistent) add("版本不一致："+ver.reason,true);
+    if(!link.found) add("关联编号缺失："+link.reason,true);
+    if(changes){ for(const ch of changes){ if(ch.status!=="已确认"){ add(`字段 ${ch.field} 状态为 ${ch.status}`,true); break; } } }
+    if(reasons.length===0) add("正式签认须由业务负责人完成（模型零审批权）",false);
+  }
+  return {required:true, reasons, hardCount:hard.length, signoffOnly:hard.length===0};
+}
+
+/* ---------- DOM 工具 ---------- */
+const $ = s => document.querySelector(s);
+const tag = (txt,cls) => `<span class="mini-tag ${cls}">${txt}</span>`;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+let current = "A";
+
+function renderScenarios(){
+  $("#scenarios").innerHTML = Object.entries(SCENARIOS).map(([k,v])=>
+    `<button class="scn ${k===current?'on':''}" data-k="${k}"><span class="t">${v.name}</span><span class="d">${v.desc}</span></button>`).join("");
+  document.querySelectorAll('.scn').forEach(b=>b.onclick=()=>{ current=b.dataset.k; renderScenarios(); fill(current); });
+}
+function fill(k){
+  const s=SCENARIOS[k];
+  $("#chkLocked").checked = true;
+  $("#selPosition").value=s.position;
+  $("#inDemand").value=s.demand; $("#inHandover").value=s.handover; $("#inRule").value=s.rule;
+  $("#inLink").value=s.link; $("#inOral").value=s.oral;
+}
+function compute(){
+  const locked=$("#chkLocked").checked;
+  const position=$("#selPosition").value;
+  const demand=$("#inDemand").value.trim(), handover=$("#inHandover").value.trim(), rule=$("#inRule").value.trim();
+  const link=$("#inLink").value.trim();
+  const s=SCENARIOS[current];
+  const scope=calcScope(locked,position);
+  const ver=calcVersion(demand,handover,rule);
+  const linkRes=calcLink(link);
+  const changes = scope.inScope ? s.changes : [];
+  const schema = {valid:s.schemaValid, errors:s.schemaErrors};
+  const review=calcReview(scope,changes,schema,ver,linkRes);
+  return {locked,position,demand,handover,rule,link,scope,ver,linkRes,changes,schema,review,s};
+}
+
+/* ---------- 五步渲染 ---------- */
+function setStep(n,badgeTxt,badgeCls,html){
+  const el=$("#step"+n);
+  el.querySelector(".badge").textContent=badgeTxt;
+  el.querySelector(".badge").className="badge "+badgeCls;
+  el.querySelector(".step-body").innerHTML=html;
+}
+function r1(d){
+  const s=d.scope;
+  let h=`<div class="kv"><span class="k">试点清单</span><span class="v">${d.locked?tag("已锁定","mt-ok"):tag("未锁定（整批暂停）","mt-bad")}</span></div>`;
+  h+=`<div class="kv"><span class="k">岗位代号</span><span class="v">${esc(d.position)}</span></div>`;
+  h+=`<div class="kv"><span class="k">清单命中</span><span class="v">${s.inScope?tag("在范围","mt-ok"):tag("不在范围","mt-bad")}</span></div>`;
+  if(s.facts){
+    h+=`<div class="kv"><span class="k">岗位硬条件</span><span class="v">${s.facts.hard.join("、")}</span></div>`;
+    h+=`<div class="kv"><span class="k">事实来源</span><span class="v">${esc(s.facts.source)}</span></div>`;
+  }
+  h+=`<div class="concl ${s.inScope?'ok':'bad'}"><b>结论：</b>${s.inScope?'在试点范围，继续核对。':'范围核对未通过 —— '+esc(s.reason)+'，转人工，不进入实质核对。'}</div>`;
+  setStep(1, s.inScope?"通过":"拦截", s.inScope?"b-ok":"b-bad", h);
+}
+function r2(d){
+  let h=`<div class="kv"><span class="k">模型调用</span><span class="v">${esc(d.s.modelReason)}</span></div>`;
+  if(d.changes.length){
+    h+=`<table><thead><tr><th>字段</th><th>抽取新值</th><th>状态</th><th>来源位置</th></tr></thead><tbody>`;
+    d.changes.forEach(c=>{
+      const cls=c.status==="已确认"?"mt-ok":"mt-warn";
+      h+=`<tr><td>${esc(c.field)}</td><td>${esc(c.value)}</td><td>${tag(c.status,cls)}</td><td>${esc(c.source)}</td></tr>`;
+    });
+    h+=`</tbody></table>`;
+    h+=`<div class="note warn">这是模型抽出的<b>草稿，不是结论</b>。状态为「未确认」的项必须人工核实；来源位置逐条挂住（f42）。</div>`;
+  }else{
+    h+=`<div class="skip">范围核对未通过，跳过模型抽取 —— 系统不对范围外单据做实质判断。</div>`;
+  }
+  setStep(2, d.changes.length?"草稿 · 非结论":"已跳过", d.changes.length?"b-neutral":"b-neutral", h);
+}
+function r3(d){
+  const v=d.ver;
+  let h=`<div class="hd">版本三向比对（规则给出，模型无权判定）</div>`;
+  h+=`<table><thead><tr><th>版本来源</th><th>值</th><th>状态</th></tr></thead><tbody>`;
+  Object.entries(v.versions).forEach(([k,val])=>{
+    const bad = !val || v.inconsistent.length>0;
+    h+=`<tr><td>${k}</td><td>${val?esc(val):'<i color="#94a3b8">（缺失）</i>'}</td><td>${val?(bad?tag("不一致","mt-bad"):tag("一致","mt-ok")):tag("缺失","mt-bad")}</td></tr>`;
+  });
+  h+=`</tbody></table>`;
+  h+=`<div class="concl ${v.consistent?'ok':'bad'}"><b>版本结论：</b>${esc(v.reason)}（<b>由确定性规则输出，不取自模型</b>）</div>`;
+
+  h+=`<div class="hd">关联编号解析</div>`;
+  h+=`<div class="kv"><span class="k">关联编号</span><span class="v">${d.link?esc(d.link):"（空）"}</span></div>`;
+  h+=`<div class="kv"><span class="k">解析结果</span><span class="v">${d.linkRes.found?tag("命中","mt-ok"):tag("缺失/无匹配","mt-bad")}　${esc(d.linkRes.reason)}</span></div>`;
+  if(d.linkRes.found){
+    h+=`<div class="kv"><span class="k">关联单据</span><span class="v">${d.linkRes.docs.join(" · ")}</span></div>`;
+  }else{
+    h+=`<div class="note">编号缺失就<b>不猜、不拼接</b>，直接转人工比对 —— 避免把两张不同单据错连到一起（f30）。</div>`;
+  }
+
+  h+=`<div class="hd">模型输出 schema 校验</div>`;
+  h+=`<div class="kv"><span class="k">是否合规</span><span class="v">${d.schema.valid?tag("合规","mt-ok"):tag("不合规 → 转人工","mt-bad")}</span></div>`;
+  if(!d.schema.valid && d.schema.errors.length){
+    h+=`<div class="note warn">0.8B 偶发漏字段 / 格式不稳，输出<b>按脏数据丢弃</b>，不进正式结论。本次缺项：${d.schema.errors.map(e=>esc(e)).join("；")}</div>`;
+  }
+  setStep(3, v.consistent&&d.linkRes.found&&d.schema.valid?"规则全过":"检出问题", (v.consistent&&d.linkRes.found&&d.schema.valid)?"b-ok":"b-warn", h);
+}
+function r4(d){
+  const r=d.review;
+  let h=`<div class="kv"><span class="k">是否转人工</span><span class="v">${tag("是 · required = true","mt-bad")}</span></div>`;
+  h+=`<div class="hd">闸门原因</div>`;
+  r.reasons.forEach(x=>{
+    h+=`<div class="reason ${x.isHard?'hard':'sign'}"><span class="ic">${x.isHard?'✕':'•'}</span><span>${esc(x.msg)}${x.isHard?'':'　（流程必经，非异常）'}</span></div>`;
+  });
+  h+=`<div class="note">闸门只负责「拦住」，<b>不替人判确认</b>。补证据或由业务负责人确认版本后，再重新走一遍。</div>`;
+  setStep(4, r.signoffOnly?"转人工 · 待签认":"转人工 · 拦截", r.signoffOnly?"b-warn":"b-bad", h);
+}
+function r5(d){
+  const r=d.review;
+  let h=`<div class="kv"><span class="k">可对外交接版本</span><span class="v">${tag("不生成","mt-bad")}</span></div>`;
+  h+=`<div class="concl ${r.signoffOnly?'':'bad'}">`;
+  if(r.signoffOnly){
+    h+=`<b>自动判定全部通过，但系统仍不出可对外版本</b> —— 依红线，正式签认须由业务负责人完成，模型零审批权。`;
+  }else{
+    h+=`<b>检出 ${r.hardCount} 项拦截，转人工队列</b> —— 不写回需求单、不自动生成交接、不发真人安排。`;
+  }
+  h+=`</div>`;
+  h+=`<div class="hd">证据编号（每条结果可溯源）</div>`;
+  h+=`<div class="chips">${Object.entries(EVIDENCE).map(([k,v])=>`<span class="chip"><b>${k}</b>　${v}</span>`).join("")}</div>`;
+  setStep(5, "结论", "b-neutral", h);
+}
+
+async function runCheck(){
+  const d=compute();
+  for(let i=1;i<=5;i++){ const el=$("#step"+i); el.classList.remove("show"); el.querySelector(".step-body").innerHTML=""; }
+  $("#btnGo").disabled=true; $("#btnGo").textContent="核对中…";
+  const renders=[r1,r2,r3,r4,r5];
+  for(let i=0;i<5;i++){ await sleep(420); $("#step"+(i+1)).classList.add("show"); renders[i](d); }
+  $("#btnGo").disabled=false; $("#btnGo").textContent="重新核对";
+}
+function reset(){
+  for(let i=1;i<=5;i++){
+    const el=$("#step"+i); el.classList.remove("show");
+    el.querySelector(".badge").textContent=""; el.querySelector(".badge").className="badge";
+    el.querySelector(".step-body").innerHTML="";
+  }
+  $("#btnGo").disabled=false; $("#btnGo").textContent="开始核对";
+  current="A"; renderScenarios(); fill("A");
+}
+
+/* ---------- 初始化 ---------- */
+renderScenarios(); fill("A");
+$("#btnGo").onclick=runCheck;
+$("#btnReset").onclick=reset;
+setTimeout(runCheck, 300);
+</script>
+</body>
+</html>

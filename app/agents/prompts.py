@@ -21,15 +21,24 @@ occurred_at/received_at/status。不要输出 version_check——版本结论由
 不由你判断。不得输出 JSON 之外的文字。"""  # 系统约束，版本结论明确排除，红线自洽
 
 
-def user_prompt(batch_id, position_code, demand_doc, handover_doc, oral_text, link_key):
-    """构造用户提示词：把脱敏单据与口头变更原文交给模型抽取。
+def user_prompt(batch_id, position_code, demand_doc, handover_doc, oral_text, link_key, evidence=None):
+    """构造用户提示词：把脱敏单据、口头变更原文与知识库检索证据交给模型抽取。
 
     入参：batch_id(str) 批次；position_code(str) 岗位代号；demand_doc(str) 需求单文本；
-          handover_doc(str) 交接单文本；oral_text(str) 电话/群消息转写；link_key(str) 关联编号。
+          handover_doc(str) 交接单文本；oral_text(str) 电话/群消息转写；link_key(str) 关联编号；
+          evidence(list[dict]|None) 知识库检索到的证据片段（RAG 检索部分），可为 None。
     出参：str 用户提示词。
-    失败行为：无（纯字符串拼接）；真实字段字典未核实前由调用方传占位文本。
+    失败行为：无（纯字符串拼接）；evidence 为空时不注入证据段，不改变原有行为。
     """
     p = get("harness", "prompt_version", "v0.1")  # 读提示词版本，便于追溯
+    # RAG 增强注释：证据来自只读知识库检索，带来源位置；只作参考上下文，
+    # 版本一致性仍由确定性规则判、模型不给版本结论——检索结果不能越过红线。
+    evidence_block = ""  # 证据段默认为空
+    if evidence:  # 有检索证据
+        lines = [  # 逐条拼证据
+            f"- {e['title']}｜来源：{e['source']}｜{e['snippet']}" for e in evidence  # 证据行
+        ]  # 证据行结束
+        evidence_block = "\n—— 知识库检索证据（仅供参考，带来源位置）——\n" + "\n".join(lines) + "\n"  # 证据段
     return f"""提示词版本：{p}
 批次：{batch_id}
 岗位代号：{position_code}
@@ -39,7 +48,7 @@ def user_prompt(batch_id, position_code, demand_doc, handover_doc, oral_text, li
 —— 脱敏交接单 ——
 {handover_doc}
 —— 电话/群消息转写 ——
-{oral_text}
+{oral_text}{evidence_block}
 请只抽取「技能条件、班次、地点、岗位代号、截止时间」五类口头变更，
 每条给出来源位置；比对三份版本，列缺项与未确认项；产出交接草稿。
 版本结论由确定性规则复核，你只给草稿。"""  # 返回用户提示词

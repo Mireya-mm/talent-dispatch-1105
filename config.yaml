@@ -17,7 +17,7 @@ ollama:                                       # 本地模型配置
   timeout_seconds: 60                         # 单次调用超时，超时转人工队列
   temperature: 0.1                            # 低温度，减少小模型自由发挥
   num_ctx: 4096                               # 上下文窗口
-  num_predict: 1024                           # 输出上限，必须留够否则 content 为空
+  num_predict: 2048                           # 输出上限，注入 RAG 证据后输出变长，须留够否则 JSON 被截断
   think: false                                # 关键：Qwen3.5 默认思考会吃光 token
   format: "json"                              # 要求结构化输出，便于 schema 校验
 
@@ -52,6 +52,14 @@ permissions:                                  # 权限矩阵：角色 -> 允许�
     submit_change: false                      # 不提交变更
     confirm_version: false                    # 不确认版本
     halt: false                               # 不能叫停
+  admin:                                      # 管理员（SaaS 运营方，非业务审批人）
+    read: true                                # 可查看全部只读数据
+    submit_change: false                      # 不提交业务变更（与业务负责人分离）
+    confirm_version: false                    # 不能确认业务版本（红线：确认权归业务负责人）
+    halt: true                                # 可叫停整批
+    manage_users: true                        # 可建/禁用用户、改角色
+    lock_pilot: true                          # 可锁定试点清单
+    view_audit: true                          # 可查看审计日志
 
 pilot:                                        # 试点范围
   batch_id: "PILOT-1105-01"                   # 批次号，演练用
@@ -64,3 +72,17 @@ harness:                                      # Harness 回归评测配置
     - "P1_unconfirmed_as_confirmed"           # 用例标识
   min_recall: 1.0                             # 缺项召回率下限（固定样本）
   min_source_traceability: 1.0                # 来源可追溯率下限
+
+knowledge:                                    # 知识库（SQLite，只读运行时，标准库 sqlite3）
+  db_path: "data/knowledge.db"                # 数据库文件路径，相对仓库根
+  search_top_k: 3                             # RAG 检索返回条数
+  min_bigram_overlap: 0.12                    # bigram 重合度阈值，低于视为不相关（fail-closed）
+  seed_notice: "合成演练样本，非真实业务，不作基线"  # 数据声明，随检索结果返回
+
+auth:                                         # 登录鉴权（标准库 hashlib/hmac，无第三方依赖）
+  db_path: "data/auth.db"                     # 用户与审计数据库，独立于知识库
+  token_secret: "synthetic-demo-secret-change-in-prod"  # 演练密钥，生产必须替换
+  token_ttl_seconds: 28800                    # token 有效期 8 小时
+  pbkdf2_iterations: 120000                   # 密码哈希迭代次数
+  bootstrap_admin: "admin"                    # 初始管理员账号（首次初始化时创建）
+  bootstrap_password: "ChangeMe@1105"         # 初始口令，演练用，首次登录后应改
