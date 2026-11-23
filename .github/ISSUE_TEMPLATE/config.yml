@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 运行教程与常见问题
+    url: https://github.com/Mireya-mm/talent-dispatch-1105/blob/main/系统运行教程.md
+    about: 起服务、装依赖、连本地 Ollama、跑验证脚本的步骤先看这里
+  - name: 技术方案与接口契约
+    url: https://github.com/Mireya-mm/talent-dispatch-1105/blob/main/docs/技术方案.md
+    about: 权限矩阵、数据边界、接口契约在技术方案里，提问前建议先核对

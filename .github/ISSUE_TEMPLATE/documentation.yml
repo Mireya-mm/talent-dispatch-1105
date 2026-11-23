@@ -1,0 +1,59 @@
+name: 文档问题
+description: README / 技术方案 / 提示词 / 教程与实际代码不一致，或有缺失、失效链接
+title: "[Docs] "
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题描述
+      description: 指出文档哪里写错、写漏或已过期。
+      placeholder: 例如：README 写「三阶段验证脚本（56 条断言）」，但仓库已有 verify_stage4.py，实际为 87 条。
+    validations:
+      required: true
+  - type: textarea
+    id: locate
+    attributes:
+      label: 涉及文件与位置
+      description: 文件名 + 章节或行号，便于定位。
+      placeholder: |
+        README.md · 「仓库结构」代码块 第 44 行
+        README.md · 「三阶段交付与自测」第 118–123 行
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望的写法
+      description: 可以直接给出替换后的文字或表格。
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 文档现状
+      description: 贴原文，或说明读者按文档操作会在哪一步卡住。
+      render: markdown
+    validations:
+      required: true
+  - type: dropdown
+    id: doc
+    attributes:
+      label: 文档类型
+      options:
+        - README / 仓库说明
+        - 技术方案（docs/技术方案.md / .docx）
+        - 提示词（docs/提示词.md）
+        - 架构图（docs/架构图.md / .svg）
+        - 业务与调研文档（业务挖掘 / 现场调研分析 / 现状流程图）
+        - 运行教程（系统运行教程.md / 智能体系统-开发交付说明.md）
+        - 注释与 docstring
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 已按文档实际操作验证过一遍
+          required: true
