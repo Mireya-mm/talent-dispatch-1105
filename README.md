@@ -33,19 +33,26 @@ talent-dispatch-1105/
 │   ├── 提示词.md                三个能力的系统约束、模板、输出 schema
 │   └── 架构图.md / .svg         竖向分层，6 个菱形人工判断点
 ├── config.yaml                  工程唯一配置（模型/权限/红线/试点/Harness，无密钥）
+├── requirements.txt             运行依赖（fastapi / uvicorn / pyyaml / httpx）
+├── index.html                   交互演示首页（GET / 直接返回，自包含无外链）
 ├── app/                         阶段5 智能体系统代码（FastAPI + 本地 Ollama）
-│   ├── main.py                  应用入口、全局异常统一兜底
-│   ├── api/routes.py            /health /models /harness/regression /v1/check
+│   ├── main.py                  应用入口、全局异常统一兜底、首页路由
+│   ├── api/routes.py            /health /models /v1/system/status /v1/positions /harness/regression /v1/check
+│   ├── api/auth_routes.py       登录 / 当前用户 / 用户管理 / 锁试点 / 审计 / 知识库检索
+│   ├── auth/                    auth_store 用户与审计存储 / security 口令哈希与 token / deps 权限依赖
 │   ├── core/                    config/response/guard/rules/schema
-│   ├── knowledge/graph.py       只读事实表 + 关联编号索引（无向量检索、无写入）
+│   ├── knowledge/               graph 只读事实表 / store 检索 / db 只读连接（无向量检索、无写入）
 │   ├── llm/ollama_client.py     唯一模型出口（think:false、超时降级）
 │   ├── agents/                  harness.py 三能力编排+回归 / prompts.py 提示词
 │   └── human/gate.py            人工确认闸门（模型零审批权）
-├── tests/verify_stage{1,2,3}.py 三阶段验证脚本（56 条断言全绿）
+├── data/                        演练数据库：auth.db（用户与审计）/ knowledge.db（知识库）
+├── tests/verify_stage{1,2,3,4}.py 开发阶段 1–4 验证脚本（87 条断言全绿）
 ├── source/                      原始资料（发现报告 + 四份可核对资料 HTML）
 │   ├── discovery-report.md
 │   └── 上海外服…四份可核对资料.html
 └── scripts/                     可复现代码（仅标准库，非业务系统）
+    ├── init_knowledge.py            建知识库（facts / links 表，运行前置）
+    ├── init_auth.py                 建初始管理员（口令取 config.yaml，运行前置）
     ├── build_interview_records.py   访谈记录三格式生成
     ├── build_flowchart_svg.py       竖向菱形流程图生成
     ├── build_architecture_svg.py    方案设计架构图生成
@@ -96,31 +103,60 @@ talent-dispatch-1105/
 cd /d/ollama && OLLAMA_MODELS='D:/ollama/models' OLLAMA_HOST='127.0.0.1:11434' ./ollama.exe serve
 
 # 2) 安装运行依赖
-python -m pip install fastapi uvicorn pyyaml httpx
+python -m pip install -r requirements.txt
 
-# 3) 起 API 服务
+# 3) 初始化数据库（首次运行；已有 data/*.db 可跳过）
+python scripts/init_knowledge.py   # 建知识库 facts / links
+python scripts/init_auth.py        # 建初始管理员，口令取 config.yaml 的 bootstrap_password
+
+# 4) 起 API 服务
 cd talent-dispatch-1105 && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
+打开 `http://127.0.0.1:8000/` 是交互演示首页；登录用 `config.yaml` 的 `bootstrap_admin` / `bootstrap_password`（演练口令，首次登录后请改）。
+
 ### 接口
 
-| 方法 | 路径 | 作用 |
-| --- | --- | --- |
-| GET | `/health` | 健康检查、只读标志 |
-| GET | `/models` | 当前模型与 think 开关 |
-| GET | `/harness/regression` | 固定样本回归评测（P1 零容忍） |
-| POST | `/v1/check` | 一次完整核对，返回草稿或人工队列 |
+| 方法 | 路径 | 鉴权 | 作用 |
+| --- | --- | --- | --- |
+| GET | `/health` | 公开 | 健康检查、只读标志 |
+| GET | `/models` | 公开 | 当前模型与 think 开关 |
+| GET | `/harness/regression` | 公开 | 固定样本回归评测（P1 零容忍） |
+| POST | `/v1/auth/login` | 公开 | 口令登录，签发带角色的 token |
+| GET | `/v1/auth/me` | 需 token | 当前用户身份 |
+| GET | `/v1/system/status` | 需 token | 工作台状态：模型在线、试点是否锁定、知识库声明 |
+| GET | `/v1/positions` | 需 token | 知识库中的岗位只读事实（硬条件／规则版本／关联编号） |
+| POST | `/v1/check` | 需 token | 一次完整核对，返回草稿或人工队列 |
+| POST | `/v1/knowledge/search` | 需 token | 知识库检索，返回带来源编号的证据片段 |
+| GET | `/v1/admin/users` | `manage_users` | 管理员列出全部用户 |
+| POST | `/v1/admin/users` | `manage_users` | 管理员建用户（角色须在权限矩阵内） |
+| POST | `/v1/admin/users/{username}/active` | `manage_users` | 启用／停用用户（不能停用自己） |
+| POST | `/v1/admin/pilot/lock` | `lock_pilot` | 锁定本批次试点岗位清单（空清单＝整批暂停） |
+| GET | `/v1/admin/audit` | `view_audit` | 查看审计日志（只追加） |
 
 统一响应 `{"ok": bool, "data": ..., "error": {"code", "msg"}}`；写回／自动决策／发真人安排的请求在路由层直接拒绝。
 
-### 三阶段交付与自测
+### 鉴权与权限（开发阶段 4）
+
+- 角色取自 `config.yaml` 的 `permissions` 矩阵：`frontline`（一线）、`business_owner`（业务负责人）、`quality_review`（质量复核）、`client_site`（客户现场）、`admin`（管理员），每个角色按动作授权（`read`／`manage_users`／`lock_pilot`／`view_audit`）。
+- 身份只来自 token：`POST /v1/check` 的角色由 `Depends(require("read"))` 注入，不再接受请求体自报角色（见 `app/api/routes.py` 注释）。
+- 口令用 PBKDF2 加盐哈希（迭代次数取 `config.yaml` 的 `pbkdf2_iterations`），token 带有效期 `token_ttl_seconds`，篡改即拒绝。
+- 管理动作一律写审计（`login`／`create_user`／`set_active`／`lock_pilot`／`check`／`kb_search`），审计表只追加；管理员不能停用自己，避免把自己锁在门外。
+- 初始管理员由 `scripts/init_auth.py` 按 `config.yaml` 的 `bootstrap_admin` / `bootstrap_password` 建出，**演练口令，首次登录后必须改**。
+
+### 开发阶段 1–4 交付与自测
+
+> 这里的「开发阶段 1–4」指智能体系统自身的搭建顺序，与训练白板的「阶段 4 方案设计／阶段 5 构建集成」不是同一套编号，不要混用。
 
 ```
-python tests/verify_stage1.py   # 阶段1：配置/响应/权限/红线/健康检查（19 断言）
-python tests/verify_stage2.py   # 阶段2：知识库/版本规则/schema/Ollama 客户端（20 断言）
-python tests/verify_stage3.py   # 阶段3：三能力编排/人工闸门/回归/主链路（17 断言）
+python tests/verify_stage1.py   # 开发阶段1：配置/响应/权限矩阵/红线/健康检查（19 断言）
+python tests/verify_stage2.py   # 开发阶段2：知识库/版本规则/schema/Ollama 客户端（20 断言）
+python tests/verify_stage3.py   # 开发阶段3：三能力编排/人工闸门/回归/主链路（19 断言）
+python tests/verify_stage4.py   # 开发阶段4：知识库检索与图谱 + 口令/token/用户管理/审计（29 断言）
 python scripts/demo_e2e.py      # 端到端演示（真实调用本地 0.8B 模型）
 ```
+
+合计 **87 条断言**（19 + 20 + 19 + 29），全部标准库 + FastAPI，不需要额外测试框架。四个脚本都可直接 `python` 运行；`verify_stage4.py` 中的用户管理用例会写 `data/auth.db`，跑完如需干净库可重跑 `scripts/init_auth.py`。
 
 **最可能出问题的地方**：Qwen3.5 默认开思考，0.8B 会把 token 耗在 `thinking` 上导致 `content` 为空——每次请求必须显式 `think:false`（Modelfile 不支持该参数）；小模型偶发缺字段/坏 JSON，一律当脏数据过 schema、不合规转人工，绝不静默放行；版本结论由确定性规则给，模型只抽变更要素（红线）。
 
