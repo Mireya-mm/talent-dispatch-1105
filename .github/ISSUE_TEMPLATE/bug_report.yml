@@ -1,0 +1,76 @@
+name: Bug 报告
+description: 代码或接口行为与文档不一致、断言失败、启动异常
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。本仓库是合成演练项目，请勿粘贴任何真实岗位需求、真实人员信息或客户数据。
+        提交前请先跑一遍 `python tests/verify_stage1.py`（以及 2/3/4），把失败输出一起贴上来。
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 一句话说清哪里不对。
+      placeholder: 例如：`/v1/check` 在未登录时返回 500，而不是统一结构的 403。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 给出可直接照做的命令或请求，能定位到具体端点／脚本／函数最好。
+      placeholder: |
+        1. python scripts/init_auth.py
+        2. python -m uvicorn app.main:app --port 8000
+        3. curl -X POST http://127.0.0.1:8000/v1/check -d '{...}'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 请贴原始输出（含 traceback），不要只贴最后一行。
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 涉及模块
+      options:
+        - 配置 / 响应结构（core）
+        - 红线校验（core/guard）
+        - 知识库 / 知识图谱（knowledge）
+        - 模型客户端（llm）
+        - 三能力编排 / Harness（agents）
+        - 人工闸门（human）
+        - 鉴权与用户管理（auth）
+        - 前端演示页（index.html / demo-flow.html）
+        - 文档与脚本（docs / scripts）
+        - 不确定
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: 运行环境
+      placeholder: Windows 11 / Python 3.11.x / fastapi 0.115 / 未启 Ollama
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 已确认内容不含真实客户或人员信息（本仓库仅合成演练数据）
+          required: true
+        - label: 已搜索现有 issue，未发现重复
+          required: true
