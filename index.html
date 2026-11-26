@@ -342,6 +342,8 @@ async function doLogin(){
     TOKEN=r.data.token;localStorage.setItem(TOKEN_KEY,TOKEN);
     ME={username:r.data.username,role:r.data.role};
     await enterWorkspace();
+    // 初始化接口可能因 token 失效触发 logoutLocal；此时停留在登录页并给出真实提示，不再把鉴权问题误报成网络异常。
+    if(!ME){err.textContent='登录状态未通过校验，请重新登录或联系管理员。';}
   }catch(e){err.textContent='无法连接服务：'+e.message}
   finally{btn.disabled=false;btn.textContent='登 录'}
 }
@@ -355,6 +357,8 @@ async function enterWorkspace(){
   document.getElementById('avatar').textContent=(ME.username||'U')[0].toUpperCase();
   if(ME.role==='admin') document.querySelector('.admin-only').classList.remove('hidden');
   await Promise.all([loadStatus(),loadPositions()]);
+  // 任一初始化请求都可能因 token 失效清空 ME；必须在读取角色前停止后续初始化，避免空值崩溃。
+  if(!ME)return;
   if(ME.role==='admin'){loadUsers();loadPilotCurrent();}
 }
 
